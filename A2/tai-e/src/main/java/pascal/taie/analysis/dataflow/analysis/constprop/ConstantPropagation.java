@@ -173,6 +173,16 @@ public class ConstantPropagation extends
 
             // 3 different conditions
             if(lvalue.isNAC() || rvalue.isNAC()){
+                // say "NAC/0" is UNDEF ?
+                // PPT does not think so ...
+                // turns out this is the last testcase
+                // stupid as fuck
+                if(bexp instanceof ArithmeticExp){
+                    ArithmeticExp.Op op = ((ArithmeticExp)bexp).getOperator();
+                    if( op == ArithmeticExp.Op.DIV  || op == ArithmeticExp.Op.REM){
+                        return (rvalue.isConstant() && rvalue.getConstant()==0) ? Value.getUndef() : Value.getNAC();
+                    }
+                }
                 return Value.getNAC();
             }
             if(lvalue.isUndef() || rvalue.isUndef()){
