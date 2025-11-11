@@ -83,7 +83,6 @@ public class DeadCodeDetection extends MethodAnalysis {
 
         while (!worklist.isEmpty()) {
             Stmt stmt = worklist.poll();
-            // avoid handling the same node more than once
             if(reachable.contains(stmt)) {
                 continue;
             }
@@ -149,7 +148,7 @@ public class DeadCodeDetection extends MethodAnalysis {
 
 
         for(Stmt stmt : cfg){
-            // Don't add Exit node into deadCode Set
+            // don't add Exit node into deadCode Set
             // for example, in the testcase "Loops"
             // you never reach the Exit node
             // But you don't want it in the deadCode Set
