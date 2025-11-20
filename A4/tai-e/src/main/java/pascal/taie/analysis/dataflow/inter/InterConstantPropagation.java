@@ -120,7 +120,6 @@ public class InterConstantPropagation extends
     @Override
     protected CPFact transferCallEdge(CallEdge<Stmt> edge, CPFact callSiteOut) {
         // TODO - finish me
-
 //        JMethod callee = (JMethod) edge.getTarget();
         JMethod callee = edge.getCallee();
         IR calleeIR = callee.getIR();
@@ -130,11 +129,13 @@ public class InterConstantPropagation extends
         CPFact boundary = cp.newInitialFact();
 
         Invoke callSite = (Invoke) edge.getSource();
-        List<RValue> uses = callSite.getInvokeExp().getUses();
+        // List<Var> uses = callSite.getInvokeExp().getUses();
+        // the line above cause bug (failed;pass testcase 1013/1065)
+        // why getArgs() is fine though?
+        List<Var> uses = callSite.getInvokeExp().getArgs();
         int cnt_args = uses.size();
 
         int k = Math.min(cnt_args, cnt_formals);
-
         for(int i = 0; i < k; i++) {
             Exp actualExp = uses.get(i);
             Value v = ConstantPropagation.evaluate(actualExp,callSiteOut);
@@ -143,7 +144,6 @@ public class InterConstantPropagation extends
                 boundary.update(formal, v);
             }
         }
-
         return boundary;
     }
 
