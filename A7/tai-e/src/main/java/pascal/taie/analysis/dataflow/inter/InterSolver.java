@@ -26,6 +26,7 @@ import pascal.taie.analysis.dataflow.fact.DataflowResult;
 import pascal.taie.analysis.graph.icfg.ICFG;
 import pascal.taie.util.collection.SetQueue;
 
+import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -60,9 +61,54 @@ class InterSolver<Method, Node, Fact> {
 
     private void initialize() {
         // TODO - finish me
+        for(Node node : icfg){
+            result.setInFact(node,analysis.newInitialFact());
+            result.setOutFact(node,analysis.newInitialFact());
+        }
+
+        icfg.entryMethods().forEach(entryMethod -> {
+            Node entryNode = icfg.getEntryOf(entryMethod);
+            if(entryNode != null){
+                result.setOutFact(entryNode,analysis.newBoundaryFact(entryNode));
+            }
+        });
     }
 
     private void doSolve() {
         // TODO - finish me
+        // Initially, add all the nodes into the worklist
+        Queue<Node> worklist = new ArrayDeque<>();
+        for(Node node : icfg){
+            worklist.add(node);
+        }
+
+        while(!worklist.isEmpty()){
+            Node node = worklist.poll();
+
+            Fact newIn = analysis.newInitialFact();
+
+            Set<?> inEdges = icfg.getInEdgesOf(node);
+            if(!inEdges.isEmpty()){
+                for(Object edgeObj : inEdges){
+                    pascal.taie.analysis.graph.icfg.ICFGEdge<Node> edge
+                            = (pascal.taie.analysis.graph.icfg.ICFGEdge<Node>) edgeObj;
+
+                    Fact predOut = result.getOutFact(edge.getSource());
+                    Fact transformed = analysis.transferEdge(edge,predOut);
+                    analysis.meetInto(transformed,newIn);
+                }
+            }
+
+
+            result.setInFact(node, newIn);
+
+            if(analysis.transferNode(node,newIn,result.getOutFact(node))){
+                for(Node succ : icfg.getSuccsOf(node)){
+                    if(!worklist.contains(succ)){
+                        worklist.add(succ);
+                    }
+                }
+            }
+        }
     }
 }
