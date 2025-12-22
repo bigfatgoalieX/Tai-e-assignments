@@ -424,7 +424,10 @@ public class Solver {
                 }
                 // the callee may have a match in set TaintTransfer(<m,from,to,u>)
                 // in this case, need to addTFGEdge
-                taintAnalysis.TaintTransfer(invoke,callee,recv,c_t);
+                taintAnalysis.TaintTransfer(invoke,callee,recv, recv.getContext());
+                // the last parameter above is supposed to provide the context info at callsite
+                // c_t (selected before) refers to the context info we choose for the callee
+                // this causes 3/29 taint flows undetected
             }
         }
     }

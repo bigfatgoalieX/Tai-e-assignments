@@ -85,6 +85,8 @@ public class TaintAnalysiss {
     // base -> result
     // arg -> base
     // arg -> result
+
+    // the callsitecontext refers to the context at the callsite !
     public void TaintTransfer(Invoke stmt, JMethod callee, CSVar recv, Context callsitecontext){
         // check whether the callee is in TaintTransfers(set of <m,from,to,u>)
         Set<TaintTransfer> m_matched =  Sets.newHashSet();
